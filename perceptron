@@ -1,0 +1,85 @@
+using System;
+
+class Perceptron
+{
+    // Función de activación (Heaviside step function)
+    static int StepFunction(double x)
+    {
+        return x >= 0 ? 1 : -1;
+    }
+
+    static void Main()
+    {
+        // Función AND y OR
+        int[][] inputs = new int[][]
+        {
+            new int[] { 1, 1, 1 },  // X0 (bias), X1, X2
+            new int[] { 1, 1, -1 },
+            new int[] { 1, -1, 1 },
+            new int[] { 1, -1, -1 }
+        };
+
+        // Salidas deseadas
+        int[] desiredOutputsAnd = { 1, -1, -1, -1 };  // Salidas AND
+        int[] desiredOutputsOr = { 1, 1, 1, -1 };     // Salidas OR
+
+        // Pesos aleatorios
+        Random rand = new Random();
+        double[] weights = new double[3];
+        for (int i = 0; i < weights.Length; i++)
+        {
+            weights[i] = rand.NextDouble();
+        }
+
+        // Tasa de aprendizaje
+        double alpha = 0.4;
+
+        // Iteraciones
+        int iterations = 10;
+
+        Console.WriteLine("Pesos iniciales: [{0}, {1}, {2}]", weights[0], weights[1], weights[2]);
+
+        for (int epoch = 0; epoch < iterations; epoch++)
+        {
+            int totalError = 0;
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                int[] x = inputs[i];
+                int y_d = desiredOutputsAnd[i];  // Cambiar a desiredOutputsOr para OR
+                int y = StepFunction(Sum(weights, x));  // Perceptrón
+                int error = y_d - y;
+                totalError += Math.Abs(error);
+
+                // Actualización de pesos
+                for (int j = 0; j < weights.Length; j++)
+                {
+                    weights[j] += alpha * error * x[j];
+                }
+
+                // Imprimir detalles de la iteración
+                Console.WriteLine("Iteración {0}, Entrada: [{1}, {2}, {3}], Salida esperada: {4}, Salida obtenida: {5}, Error: {6}, Pesos: [{7}, {8}, {9}]",
+                                  epoch + 1, x[0], x[1], x[2], y_d, y, error, weights[0], weights[1], weights[2]);
+            }
+
+            // Impresión del error
+            Console.WriteLine("Epoch {0}, Error total: {1}\n", epoch + 1, totalError);
+            if (totalError == 0)
+            {
+                break;
+            }
+        }
+
+        Console.WriteLine("Pesos finales: [{0}, {1}, {2}]", weights[0], weights[1], weights[2]);
+    }
+
+    // Función de suma ponderada
+    static double Sum(double[] weights, int[] inputs)
+    {
+        double sum = 0;
+        for (int i = 0; i < weights.Length; i++)
+        {
+            sum += weights[i] * inputs[i];
+        }
+        return sum;
+    }
+}
